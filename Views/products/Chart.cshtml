@@ -1,0 +1,47 @@
+﻿
+@{
+    ViewBag.Title = "View";
+}
+<div class="row">
+    <div>
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="col-md-offset-0 font-weight-bold  text-primary">Bar Chart</h6>
+
+            </div>
+            <div class="card-body">
+                <div class="chart-bar">
+                    <canvas id="chartContainer"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<asp:literal runat="Server" id="cData"></asp:literal>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script type="text/javascript">
+    var chartLables;
+    var chartData;
+    new Chart(document.getElementById("chartContainer"), {
+        type: 'bar',
+        data: {
+            labels: [2016, 2017, 2018, 2019],
+            datasets: [
+                {
+                    label: "Mountain Bikes",
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)','rgba(255, 159, 64, 0.2)','rgba(255, 205, 86, 0.2)',],
+                    borderColor: ['rgb(255, 99, 132)', 'rgb(255, 159, 64)', 'rgb(255, 205, 86)'],
+                    borderWidth: 1,
+                    data: @ViewData["data"]
+                }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Mountain Bikes Order Report'
+            }
+        }  
+});
+</script>  

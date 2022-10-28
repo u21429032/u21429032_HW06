@@ -1,0 +1,385 @@
+﻿@model IEnumerable<Homework_Assignment_6.Models.product>
+
+@{
+    ViewBag.Title = "Index";
+}
+<!-- ✅ Load CSS file for DataTables  -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css"
+      integrity="sha512-1k7mWiTNoyx2XtmI96o+hdjP8nn0f3Z2N4oF/9ZZRgijyV4omsKOXEnqL1gKQNPy2MTSP9rIEWGcH/CInulptA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer" />
+
+<!-- ✅ load jQuery ✅ -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+
+<!-- ✅ load DataTables ✅ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+        integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+
+<h2>Products</h2>
+<div class="row">
+    <div class="col-md-3">
+        <input class="form-control" id="myInput" type="text" placeholder="Search..">
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-primary" id="searching" onclick="myFunction()">Search</button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal" onclick="clearTextBox();">Create</button><br /><br />
+    </div>
+</div>
+<br />
+<table class="table" id="mTable">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Year
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Brand
+            </th>
+            <th>
+                Category
+            </th>
+            <th>
+                Action(Edit)
+            </th>
+            <th>
+                Action(Details)
+            </th>
+            <th>
+                Action(Delete)
+            </th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+        @*<tr id="LoadingStatus" style="color:red;"></tr>*@
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.product_name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.model_year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.list_price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.brand.brand_name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.category.category_name)
+                </td>
+
+                <td><button class='btn btn-primary'  args="'+ @item.product_id +'"  data-toggle="modal" data-target="#myModal" onclick="Update(@item.product_id)">Edit</button></td>
+
+                <td><button class='btn btn-info' onclick='DetailsProduct(@item.product_id);'>Details</button></td>
+
+                <td><button class='btn btn-danger' args="'+ @item.product_id +'" onclick="Delele(@item.product_id)">Delete</button></td>
+
+            </tr>
+        }
+
+    </tbody>
+</table>
+<div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title" id="myModalLabel">Add Products</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="ProductName">ProductName</label>
+                        <input type="text" class="form-control" id="ProductName" placeholder="ProductName" />
+                    </div>
+                    <div class="form-group">
+                        <label for="BrandId">Brand</label>
+                        @Html.DropDownList("brand_id", null, htmlAttributes: new { @class = "form-control" })
+                        @*<input type="text" class="form-control" id="Name" placeholder="Name" />*@
+                    </div>
+                    <div class="form-group">
+                        <label for="CategoryId">Category</label>
+                        @Html.DropDownList("category_id", null, htmlAttributes: new { @class = "form-control" })
+                        @*<input type="text" class="form-control" id="Age" placeholder="Age" />*@
+                    </div>
+                    <div class="form-group">
+                        <label for="ModelYear">Model Year</label>
+                        <input type="text" class="form-control" id="ModelYear" placeholder="2022" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Price">Price R:</label>
+                        <input type="text" class="form-control" id="Price" placeholder="00" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAdd" style="display:none;" onclick="return Add();">Add</button>
+                <button type="button" class="btn btn-primary" id="btnUpdate" onclick="Update();">Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title" id="myModalLabel">Add Products</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="ProductName">ProductName</label>
+                        <input type="text" class="form-control" id="ProductName" placeholder="ProductName" />
+                    </div>
+                    <div class="form-group">
+                        <label for="BrandId">Brand</label>
+                        @Html.DropDownList("brand_id", null, htmlAttributes: new { @class = "form-control" })
+                        @*<input type="text" class="form-control" id="Name" placeholder="Name" />*@
+                    </div>
+                    <div class="form-group">
+                        <label for="CategoryId">Category</label>
+                        @Html.DropDownList("category_id", null, htmlAttributes: new { @class = "form-control" })
+                        @*<input type="text" class="form-control" id="Age" placeholder="Age" />*@
+                    </div>
+                    <div class="form-group">
+                        <label for="ModelYear">Model Year</label>
+                        <input type="text" class="form-control" id="ModelYear" placeholder="2022" />
+                    </div>
+                    <div class="form-group">
+                        <label for="Price">Price R:</label>
+                        <input type="text" class="form-control" id="Price" placeholder="00" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAdd" onclick="return Add();">Add</button>
+                <button type="button" class="btn btn-primary" id="btnUpdate" style="display:none;" onclick="Update();">Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <script>
+        function Edit() {
+            var id = $(this).attr('args');
+
+            $.ajax({
+                type: "GET",
+                url: "/products/Edit ?/Id=" + id"",
+                data: { "id": id },
+                contentType: 'application/x-www-form-urlencoded',
+                dataType: "json",
+                headers:
+                {
+                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (msg) {
+                    $('#ProductName').val(data.product_name);
+                    $('#ModelYear').val(data.model_year);
+                    $('#Price').val(data.list_price);
+                    $('#brand_id').val(data.brand_id);
+                    $('#category_id').val(data.category_id);
+                    $("#btnAdd").addClass("btn-update"); //add the btn-update class to modal save button so that we can make diferrent between add or update action
+
+                    $('#updateModal').modal('show');
+                }
+            });
+
+        });
+
+         function Delete() {
+            var id = $(this).attr('args');
+            $.ajax({
+                type: "POST",
+                url: "/Index?handler=Delete",
+                data: { "id": id },
+                contentType: 'application/x-www-form-urlencoded',
+                dataType: "json",
+                headers:
+                {
+                    "RequestVerificationToken": $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function (msg) {
+                    $('table#CustomerTable tr#' + id).remove();
+                }
+            });
+        };
+    </script>
+</div>
+
+<script>
+    //Getall()
+    //function for deleting employee's record
+    function Delele(ID) {
+        var ans = confirm("Are you sure you want to delete this Record?");
+
+        if (ans) {
+            $.ajax({
+                url: "/Products/Delete/" + ID,
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                dataType: "json",
+                success: function (result) {
+                    alert("successfully deleted");
+                },
+                
+            });
+        }
+    }
+    function Update(ID) {
+        var res = validate();
+        if (res == false) {
+            return false;
+        }
+        var empObj = {
+            product_id: ID,
+            product_name: $('#ProductName').val(),
+            model_year: $('#ModelYear').val(),
+            list_price: $('#Price').val(),
+            brand_id: $('#brand_id').val(),
+            category_id: $('#category_id').val(),
+        };
+        $.ajax({
+            url: "/Products/Update",
+            data: JSON.stringify(empObj),
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (result) {
+                loadData();
+                $('#myModal').modal('hide');
+                $('#ProductName').val("");
+                $('#ModelYear').val("");
+                $('#Price').val("");
+                $('#brand_id').val("");
+                $('#category_id').val("");
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+    $("#LoadingStatus").html("Loading...");
+    $.get("/products/GetProducts", null, DataBind);
+    function DataBind(products) {
+        var setData = $("#myTable");
+        for (var i = 0; i < products.length; i++) {
+            var Data = "<tr class='row_" + jsonResult[i].product_id + "' >" +
+                "<td>" + products[i].product_name + "</td>" +
+                "<td>" + products[i].model_year + "</td>" +
+                "<td>" + products[i].list_price + "</td>" +
+                "<td>" + products[i].brand_id + "</td>" +
+                "<td>" + products[i].category_id + "</td>" +
+                "<td>" + "<button class='btn btn-primary' onclick='GetProducts(" + products[i].product_id + ");'>Edit</button>" + "</td>" +
+                "<td>" + "<button class='btn btn-info' onclick='GetProducts(" + products[i].product_id + ");'>Details</button>" + "</td>" +
+                "<td>" + "<button class='btn btn-danger' onclick='GetProducts(" + products[i].product_id + ");'>Delete</button>" + "</td>" +
+                "</tr>";
+            setData.append(Data);
+            $("#LoadingStatus").html("Loading...");
+        }
+    }
+    function myFunction() {
+        var value = $("#myInput").val().toLowerCase();
+        $("#myTable tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    }
+    var IsNew = true;
+    function Add() {
+        var url = "";
+        var data = "";
+        var method;
+        if (IsNew == true) {
+            url = "/products/Save";
+            data = "{product_name:'" + $('#ProductName').val() + "',model_year: '" + $('#ModelYear').val() + "',list_price: '" + $('#Price').val() + "',brand_id: '" + $('#brand_id').val() + "',category_id: '" + $('#category_id').val() + "'}";
+            method = "POST";
+        }
+        $.ajax({
+            type: method,
+            url: url,
+            dataType: 'JSON',
+            contentType: "application/json; charset=utf-8",
+            data: data,
+            success: function (data) {
+                if (IsNew) {
+                    alert("success");
+                }
+            }
+        });
+    }
+    function Getall() {
+        $("#myTable").dataTable().fnDestroy();
+        $("#myTable").dataTable({
+            "ajax": {
+                "url": '/products/GetProducts',
+                "type": "GET",
+                "datatype": "JSON",
+            },
+            "columns":
+                [
+                    { data: "product_name" },
+                    { data: "model_year" },
+                    { data: "list_price" },
+                    { data: "brand_name" },
+                    { data: "category_name" },
+                    //{
+                    //    data: "product_id", "render": function (data) {
+                    //        return "<button class='btn btn-primary'  data-toggle='modal' data-target='#updateModal' onclick='GetProducts(" + data + ");'>Edit</button>";
+                    //        //return "<button class='btn btn-info' onclick='GetProducts(" + data + ");'>Details</button>";
+                    //        //return "<button class='btn btn-danger' onclick='GetProducts(" + data + ");'>Delete</button>";
+                    //    }
+                    //},
+                    //{
+                    //    data: "product_id", "render": function (data) {
+                    //        return "<button class='btn btn-info' onclick='GetProducts(" + data + ");'>Details</button>";
+                    //    }
+                    //},
+                    //{
+                    //    data: "product_id", "render": function (data) {
+                    //        return "<button class='btn btn-danger' onclick='GetProducts(" + data + ");'>Delete</button>";
+                    //    }
+                    //},
+
+
+                ],
+
+        });
+
+    }
+    function EditProduct(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/products/getProduct?/Id=" + id,
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                ID = data.poduct_id;
+                $('#ProductName').val(data.product_name);
+                $('#ModelYear').val(data.model_year);
+                $('#Price').val(data.list_price);
+                $('#brand_id').val(data.brand_id);
+                $('#category_id').val(data.category_id);
+                //data = "{product_name:'" + $('#ProductName').val() + "',model_year: '" + $('#ModelYear').val() + "',list_price: '" + $('#Price').val() + "',brand_id: '" + $('#brand_id').val() + "',category_id: '" + $('#category_id').val() + "'}";
+            }
+        })
+    }
+</script>
+<link rel="stylesheet" href="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" />
+@*<script src="//cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"></script>*@
+<script src="//cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
